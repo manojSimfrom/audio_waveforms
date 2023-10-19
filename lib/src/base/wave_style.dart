@@ -1,3 +1,4 @@
+import 'package:audio_waveforms/src/base/utils.dart';
 import 'package:flutter/material.dart';
 
 class WaveStyle {
@@ -86,6 +87,11 @@ class WaveStyle {
   /// So scale them, [scaleFactor] can be used. Defaults to 20.0.
   final double scaleFactor;
 
+  ///This parameter is essential for controlling the orientation of the audio wave.
+  ///It offers two options: "ltr" (Left to Right) and "rtl" (Right to Left),
+  ///with "ltr" being the default direction.
+  final WaveDirection waveDirection;
+
   /// A model class to provide style to the waveforms.
   const WaveStyle({
     this.waveColor = Colors.blueGrey,
@@ -113,6 +119,7 @@ class WaveStyle {
     this.durationLinesColor = Colors.blueAccent,
     this.gradient,
     this.scaleFactor = 20.0,
+    this.waveDirection = WaveDirection.ltr,
   }) : assert(waveThickness < spacing,
             "waveThickness can't be greater than spacing");
 }

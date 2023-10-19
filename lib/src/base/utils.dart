@@ -198,3 +198,16 @@ enum UpdateFrequency {
   /// Reports duration at every 200 milliseconds.
   low
 }
+
+///This parameter is essential for controlling the orientation of the audio wave.
+///It offers two options: "ltr" (Left to Right) and "rtl" (Right to Left),
+///with "ltr" being the default direction.
+enum WaveDirection { ltr, rtl }
+
+extension WaveExtention on WaveDirection {
+  /// Check WaveDirection is equals to ltr(Left to Right) or not.
+  bool get isLTR => this == WaveDirection.ltr;
+
+  /// Check WaveDirection is equals to rtl(Right to Left) or not.
+  bool get isRTL => this == WaveDirection.rtl;
+}

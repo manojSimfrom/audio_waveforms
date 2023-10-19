@@ -146,6 +146,7 @@ class _HomeState extends State<Home> {
                                     waveColor: Colors.white,
                                     extendWaveform: true,
                                     showMiddleLine: false,
+                                    waveDirection: WaveDirection.rtl,
                                   ),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(12.0),

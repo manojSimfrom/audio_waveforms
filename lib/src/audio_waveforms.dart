@@ -39,11 +39,13 @@ class _AudioWaveformsState extends State<AudioWaveforms> {
   Offset _dragOffset = Offset.zero;
 
   double _initialOffsetPosition = 0.0;
-  double _initialPosition = 0.0;
+  late double _initialPosition;
 
   @override
   void initState() {
     super.initState();
+    _initialPosition =
+        widget.waveStyle.waveDirection.isRTL ? widget.size.width : 0.0;
     widget.recorderController.addListener(() {
       if (mounted) setState(() {});
     });
@@ -112,6 +114,7 @@ class _AudioWaveformsState extends State<AudioWaveforms> {
                 shouldCalculateScrolledPosition:
                     widget.shouldCalculateScrolledPosition,
                 scaleFactor: widget.waveStyle.scaleFactor,
+                waveDirection: widget.waveStyle.waveDirection,
               ),
             ),
           ),
@@ -144,8 +147,16 @@ class _AudioWaveformsState extends State<AudioWaveforms> {
     }
   }
 
-  ///This handles scrolling of the wave
   void _handleHorizontalDragUpdate(DragUpdateDetails details) {
+    if (widget.waveStyle.waveDirection.isRTL) {
+      _handleRTLHorizontalDragUpdate(details);
+    } else {
+      _handleLTRHorizontalDragUpdate(details);
+    }
+  }
+
+  ///This handles scrolling of the wave
+  void _handleLTRHorizontalDragUpdate(DragUpdateDetails details) {
     var direction = details.globalPosition.dx - _initialOffsetPosition;
     widget.recorderController.setRefresh(false);
     _isScrolled = true;
@@ -169,6 +180,30 @@ class _AudioWaveformsState extends State<AudioWaveforms> {
     }
   }
 
+  void _handleRTLHorizontalDragUpdate(DragUpdateDetails details) {
+    var direction = _initialOffsetPosition - details.globalPosition.dx;
+    widget.recorderController.setRefresh(false);
+    _isScrolled = true;
+
+    ///left to right
+    if (-_totalBackDistance.dx + _dragOffset.dx + details.delta.dx <
+            (widget.size.width / 2) &&
+        direction > 0) {
+      setState(() => _dragOffset -= details.delta);
+    }
+
+    ///right to left
+    else if (-_totalBackDistance.dx +
+                _dragOffset.dx +
+                (widget.waveStyle.spacing *
+                    widget.recorderController.waveData.length) +
+                details.delta.dx >
+            (widget.size.width / 2) &&
+        direction < 0) {
+      setState(() => _dragOffset -= details.delta);
+    }
+  }
+
   ///This will help-out to determine to get direction of the scroll
   void _handleHorizontalDragStart(DragStartDetails details) {
     _initialOffsetPosition = details.globalPosition.dx;
@@ -187,12 +222,14 @@ class _AudioWaveformsState extends State<AudioWaveforms> {
           _totalBackDistance + Offset(widget.waveStyle.spacing, 0.0);
       _isScrolled = false;
     } else {
-      _initialPosition = 0.0;
+      _initialPosition =
+          widget.waveStyle.waveDirection.isRTL ? widget.size.width : 0.0;
       _totalBackDistance =
           _totalBackDistance + Offset(widget.waveStyle.spacing, 0.0);
     }
     if (widget.recorderController.shouldClearLabels) {
-      _initialOffsetPosition = 0.0;
+      _initialPosition =
+          widget.waveStyle.waveDirection.isRTL ? widget.size.width : 0.0;
       _totalBackDistance = Offset.zero;
       _dragOffset = Offset.zero;
     }

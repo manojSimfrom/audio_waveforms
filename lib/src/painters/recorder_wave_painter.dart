@@ -1,7 +1,7 @@
+import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 
 import '/src/base/label.dart';
-import '../base/utils.dart';
 
 ///This will paint the waveform
 ///
@@ -49,6 +49,7 @@ class RecorderWavePainter extends CustomPainter {
   final Function(int) setCurrentPositionDuration;
   final bool shouldCalculateScrolledPosition;
   final double scaleFactor;
+  final WaveDirection waveDirection;
 
   RecorderWavePainter({
     required this.waveData,
@@ -82,6 +83,7 @@ class RecorderWavePainter extends CustomPainter {
     required this.setCurrentPositionDuration,
     required this.shouldCalculateScrolledPosition,
     required this.scaleFactor,
+    required this.waveDirection,
   })  : _wavePaint = Paint()
           ..color = waveColor
           ..strokeWidth = waveThickness
@@ -103,6 +105,7 @@ class RecorderWavePainter extends CustomPainter {
       pushBack();
       revertClearlabelCall();
     }
+
     for (var i = 0; i < waveData.length; i++) {
       ///wave gradient
       if (gradient != null) _waveGradient();
@@ -160,6 +163,14 @@ class RecorderWavePainter extends CustomPainter {
   }
 
   void _addLabel(Canvas canvas, int i, Size size) {
+    if (waveDirection.isRTL) {
+      _addRTLLabel(canvas, i, size);
+    } else {
+      _addLTRLabel(canvas, i, size);
+    }
+  }
+
+  void _addLTRLabel(Canvas canvas, int i, Size size) {
     canvas.drawLine(
         Offset(
             _labelPadding + dragOffset.dx - totalBackDistance.dx, size.height),
@@ -182,6 +193,32 @@ class RecorderWavePainter extends CustomPainter {
     _labelPadding += spacing * updateFrequecy;
   }
 
+  void _addRTLLabel(Canvas canvas, int i, Size size) {
+    canvas.drawLine(
+        Offset(
+            size.width + totalBackDistance.dx - _labelPadding - dragOffset.dx,
+            size.height),
+        Offset(
+            size.width + totalBackDistance.dx - _labelPadding - dragOffset.dx,
+            size.height + durationLinesHeight),
+        _durationLinePaint);
+    _labels.add(
+      Label(
+        content: showHourInDuration
+            ? Duration(seconds: i).toHHMMSS()
+            : Duration(seconds: i).inSeconds.toMMSS(),
+        offset: Offset(
+            size.width +
+                totalBackDistance.dx -
+                _labelPadding -
+                durationTextPadding -
+                dragOffset.dx,
+            size.height + labelSpacing),
+      ),
+    );
+    _labelPadding += spacing * updateFrequecy;
+  }
+
   void _drawMiddleLine(Canvas canvas, Size size) {
     canvas.drawLine(
       Offset(size.width / 2, 0),
@@ -191,6 +228,14 @@ class RecorderWavePainter extends CustomPainter {
   }
 
   void _drawUpperWave(Canvas canvas, Size size, int i) {
+    if (waveDirection.isRTL) {
+      _drawRTLUpperWave(canvas, size, i);
+    } else {
+      _drawLTRUpperWave(canvas, size, i);
+    }
+  }
+
+  void _drawLTRUpperWave(Canvas canvas, Size size, int i) {
     canvas.drawLine(
         Offset(
             -totalBackDistance.dx +
@@ -207,7 +252,32 @@ class RecorderWavePainter extends CustomPainter {
         _wavePaint);
   }
 
+  void _drawRTLUpperWave(Canvas canvas, Size size, int i) {
+    canvas.drawLine(
+        Offset(
+            totalBackDistance.dx +
+                initialPosition -
+                (spacing * i) -
+                dragOffset.dx,
+            size.height - bottomPadding),
+        Offset(
+            totalBackDistance.dx +
+                initialPosition -
+                (spacing * i) -
+                dragOffset.dx,
+            -(waveData[i] * scaleFactor) + size.height - bottomPadding),
+        _wavePaint);
+  }
+
   void _drawLowerWave(Canvas canvas, Size size, int i) {
+    if (waveDirection.isRTL) {
+      _drawRTLLowerWave(canvas, size, i);
+    } else {
+      _drawLTRLowerWave(canvas, size, i);
+    }
+  }
+
+  void _drawLTRLowerWave(Canvas canvas, Size size, int i) {
     canvas.drawLine(
         Offset(
             -totalBackDistance.dx +
@@ -220,6 +290,23 @@ class RecorderWavePainter extends CustomPainter {
                 dragOffset.dx +
                 (spacing * i) -
                 initialPosition,
+            (waveData[i] * scaleFactor) + size.height - bottomPadding),
+        _wavePaint);
+  }
+
+  void _drawRTLLowerWave(Canvas canvas, Size size, int i) {
+    canvas.drawLine(
+        Offset(
+            totalBackDistance.dx +
+                initialPosition -
+                dragOffset.dx -
+                (spacing * i),
+            size.height - bottomPadding),
+        Offset(
+            totalBackDistance.dx +
+                initialPosition -
+                dragOffset.dx -
+                (spacing * i),
             (waveData[i] * scaleFactor) + size.height - bottomPadding),
         _wavePaint);
   }
